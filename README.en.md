@@ -62,6 +62,8 @@ Then just talk to Claude Code:
 
 No buttons, no panels, no Figma plugin. Agent-agnostic — drops into Claude Code, Cursor, Trae, Hermes, OpenClaw, or any markdown-skill-capable agent.
 
+It is not a "one prompt straight to final" magic button. Huashu-Design enforces the full design workflow: route the task, ask the key questions, gather assets, show directions and a Junior pass, then build the hi-fi artifact. If the user says "just do it", the skill still starts with assumptions and 3 directions for confirmation, so the agent cannot beautifully execute the wrong direction.
+
 ---
 
 ## Star History
@@ -85,6 +87,19 @@ No buttons, no panels, no Figma plugin. Agent-agnostic — drops into Claude Cod
 | Infographic / data viz | Print-quality typography · exports to PDF/PNG/SVG | 10 min |
 | Design direction advisor | 5 schools × 20 philosophies · 3 directions recommended · Demos generated in parallel | 5 min |
 | 5-dimension expert critique | Radar chart + Keep/Fix/Quick Wins · actionable punch list | 3 min |
+
+---
+
+## Workflow Guardrails
+
+Since v2.1, Huashu-Design treats the full workflow as a hard contract:
+
+- **Task router**: classify the work as web, app, deck, motion, infographic, or critique before reading the corresponding references and starter assets.
+- **Mandatory direction alignment**: no final artifact from a vague single prompt; assumptions, directions, and placeholders come first.
+- **Reference Intake**: automatically try public inspiration sources and extract layout, hierarchy, density, motion, and interaction patterns; if a source needs login/payment or cannot be read, say so once, accept user screenshots/links, or skip.
+- **Structured brand specs**: brand tasks produce both `brand-spec.md` and `brand-spec.json`; HTML reads logo, product images, UI screenshots, colors, and fonts from the JSON.
+- **Design lint**: run `scripts/design_lint.py` before delivery to catch missing assumptions, asset gaps, AI-slop risks, and brand-spec drift.
+- **Definition of Done**: every artifact gets lint + Playwright verification; warnings must be fixed or explained.
 
 ---
 
@@ -142,7 +157,7 @@ No heroic one-shot attempts: start with assumptions + placeholders + reasoning, 
 
 ### Core Asset Protocol · 5-step hard process
 
-Mandatory whenever the task involves a specific brand: ask → search → download (three fallback paths) → verify + extract → write `brand-spec.md` covering **logo, product shots, UI screenshots, colors, fonts** — all required assets, not just colors.
+Mandatory whenever the task involves a specific brand: ask → search → download (three fallback paths) → verify + extract → write `brand-spec.md` + `brand-spec.json` covering **logo, product shots, UI screenshots, colors, fonts** — all required assets, not just colors.
 
 <p align="center"><img src="https://github.com/alchaincyf/huashu-design/releases/download/v2.0/w1-brand-protocol-en.gif" width="100%"></p>
 
@@ -160,7 +175,7 @@ The hardest rule in the skill. When the task touches a specific brand (Stripe, L
 | 2 · Search official channels | `<brand>.com/brand` · `<brand>.com/press` · `brand.<brand>.com` · product pages · launch films | Find authoritative assets |
 | 3 · Download by asset type | Logo (SVG → inline-SVG in HTML → social avatar) · Product shots (hero → press kit → launch video frames → AI-generated from reference) · UI (App Store screenshots → official video frames) | Three fallback paths per asset type |
 | 4 · Verify + extract | Check logo fidelity · product image resolution · UI freshness · grep color hex from real assets | **Never guess from memory** |
-| 5 · Freeze to spec | Write `brand-spec.md` with logo paths, product image paths, UI screenshot paths, CSS variables for colors/fonts | Un-frozen knowledge evaporates |
+| 5 · Freeze to spec | Write `brand-spec.md` + `brand-spec.json` with logo paths, product image paths, UI screenshot paths, CSS variables for colors/fonts | Un-frozen knowledge evaporates |
 
 **Ranking of asset importance** (from the skill's internal rubric):
 
@@ -171,6 +186,10 @@ The hardest rule in the skill. When the task touches a specific brand (Stripe, L
 5. Fonts — auxiliary
 
 A/B-tested (v1 vs v2, 6 agents each): **v2 reduced stability variance by 5×**. Stability of stability — that's the real moat.
+
+### Task Router + Definition of Done
+
+Every task starts with `references/task-router.md`. It defines the output type, required references, starter assets/scripts, and Definition of Done. The router is not a shortcut; it prevents the agent from turning every request into the same kind of webpage.
 
 ### Design Direction Advisor (Fallback)
 
@@ -190,15 +209,17 @@ The default working mode across every task:
 - Write assumptions + placeholders + reasoning comments directly into the HTML
 - Show it to the user early (even if just gray blocks)
 - Fill in real content → variations → Tweaks — show at each of these three steps
-- Manually eyeball the browser with Playwright before delivery
+- Run `scripts/design_lint.py` + Playwright before delivery, then manually eyeball the browser
 
 ### Fact Verification First (Principle #0)
 
-The highest-priority rule, added after a real failure mode: when the task mentions a specific product / technology / event (e.g., "DJI Pocket 4", "Nano Banana Pro", "Gemini 3 Pro"), the first action **must** be a `WebSearch` to confirm existence, release status, current version, and specs. No claims from training-corpus memory. Cost of a search: ~10 seconds. Cost of a wrong assumption: 1–2 hours of rework.
+The highest-priority rule, added after a real failure mode: when the task mentions a specific product / technology / event (e.g., "DJI Pocket 4", "Nano Banana Pro", "Gemini 3 Pro"), the first action **must** use `WebSearch` to confirm existence, release status, current version, and specs. No claims from training-corpus memory. Cost of a search: ~10 seconds. Cost of a wrong assumption: 1–2 hours of rework.
 
 ### Anti AI-slop Rules
 
 Avoid the visual common denominator of AI output (purple gradients / emoji icons / rounded-corner + left border accent / SVG humans / Inter-as-display / **CSS silhouettes standing in for real product shots**). Use `text-wrap: pretty` + CSS Grid + carefully chosen serif display faces + oklch colors.
+
+Part of this checklist is now executable through `scripts/design_lint.py`.
 
 ---
 
@@ -250,6 +271,13 @@ huashu-design/
 │   ├── showcases/           # 24 prebuilt samples (8 scenes × 3 styles)
 │   └── bgm-*.mp3            # 6 scene-specific background tracks
 ├── references/              # Drill-down docs by task (Chinese)
+│   ├── task-router.md        # Task routing + Definition of Done
+│   ├── reference-intake.md    # Automatic reference sampling protocol
+│   ├── inspiration-sources.md # Default inspiration source categories
+│   ├── brand-spec-structured.md
+│   ├── environment-adapters.md
+│   ├── demo-index.md         # Maps demos/*.html back to task routes
+│   ├── asset-inventory.md    # Dynamic assets / retention / removal record
 │   ├── animation-pitfalls.md
 │   ├── design-styles.md     # 20 design philosophies in detail
 │   ├── slide-decks.md
@@ -258,6 +286,7 @@ huashu-design/
 │   ├── video-export.md
 │   └── ...
 ├── scripts/                 # Export toolchain
+│   ├── design_lint.py       # Workflow + AI-slop static checks
 │   ├── render-video.js      # HTML → MP4
 │   ├── convert-formats.sh   # MP4 → 60fps + GIF
 │   ├── add-music.sh         # MP4 + BGM
@@ -265,7 +294,14 @@ huashu-design/
 │   ├── export_deck_pptx.mjs
 │   ├── html2pptx.js
 │   └── verify.py
-└── demos/                   # Capability demos referenced by this README
+├── templates/                # Junior-pass starter templates, not final artifacts
+│   ├── landing-page.html
+│   ├── app-overview.html
+│   ├── app-flow.html
+│   ├── deck-showcase.html
+│   ├── motion-stage.html
+│   └── infographic.html
+└── demos/                   # Capability demo source, used as references via demo-index.md
 ```
 
 ---

@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>App Flow Junior Pass</title>
+  <!--
+  Junior Designer pass - not final.
+
+  Assumptions:
+  - Delivery shape: clickable flow demo.
+  - This generic frame is only for flow logic. For iOS final work, inline assets/ios_frame.jsx.
+  - Screen content remains placeholder until direction and real data are confirmed.
+
+  Open questions:
+  - What is the primary user path?
+  - Which states must be clickable?
+  - Should this be converted to iOS, Android, or custom device frame?
+  -->
+  <style>
+    :root {
+      --bg: #f1ece3;
+      --screen: #fffaf2;
+      --ink: #1b1814;
+      --muted: #777067;
+      --line: #d7cec0;
+      --accent: #7c3f2c;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 32px;
+    }
+
+    .wrap {
+      display: grid;
+      gap: 18px;
+      justify-items: center;
+    }
+
+    .frame {
+      width: min(390px, calc(100vw - 64px));
+      aspect-ratio: 390 / 844;
+      background: var(--screen);
+      border: 1px solid var(--line);
+      box-shadow: 0 24px 70px rgba(43, 32, 20, 0.16);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    header,
+    footer {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      border-bottom: 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .screen {
+      padding: 26px 22px;
+      display: grid;
+      align-content: start;
+      gap: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font: 500 34px/1 ui-serif, Georgia, serif;
+      text-wrap: balance;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .slot {
+      border: 1px dashed var(--line);
+      min-height: 120px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      text-align: center;
+      padding: 14px;
+      font-size: 13px;
+    }
+
+    button {
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: white;
+      padding: 13px 14px;
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    .tab {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 8px 4px;
+    }
+
+    .caption {
+      max-width: 520px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="frame" aria-label="Clickable app flow">
+      <header id="screen-label">Step 1 / Junior pass</header>
+      <div class="screen" id="screen"></div>
+      <footer>
+        <button class="tab" data-screen="home">Home</button>
+        <button class="tab" data-screen="detail">Detail</button>
+        <button class="tab" data-screen="done">Done</button>
+      </footer>
+    </section>
+    <p class="caption">Use this only to confirm flow logic. Replace frame with `assets/ios_frame.jsx` or `assets/android_frame.jsx` for final device mockups.</p>
+  </main>
+
+  <script>
+    const screens = {
+      home: {
+        label: "Step 1 / Entry",
+        title: "[Entry screen]",
+        copy: "[Primary user motivation and context]",
+        slot: "[Real content/state placeholder]",
+        action: "Continue",
+        next: "detail"
+      },
+      detail: {
+        label: "Step 2 / Core action",
+        title: "[Core interaction]",
+        copy: "[What the user changes, chooses, or confirms]",
+        slot: "[Interactive state placeholder]",
+        action: "Confirm",
+        next: "done"
+      },
+      done: {
+        label: "Step 3 / Feedback",
+        title: "[Success / result]",
+        copy: "[Outcome and next best action]",
+        slot: "[Result state placeholder]",
+        action: "Restart",
+        next: "home"
+      }
+    };
+
+    const screenEl = document.querySelector("#screen");
+    const labelEl = document.querySelector("#screen-label");
+
+    function render(name) {
+      const screen = screens[name] || screens.home;
+      labelEl.textContent = screen.label;
+      screenEl.innerHTML = `
+        <h1>${screen.title}</h1>
+        <p>${screen.copy}</p>
+        <div class="slot">${screen.slot}</div>
+        <button data-next="${screen.next}">${screen.action}</button>
+      `;
+      screenEl.querySelector("[data-next]").addEventListener("click", (event) => {
+        render(event.currentTarget.dataset.next);
+      });
+    }
+
+    document.querySelectorAll("[data-screen]").forEach((button) => {
+      button.addEventListener("click", () => render(button.dataset.screen));
+    });
+
+    render("home");
+  </script>
+</body>
+</html>

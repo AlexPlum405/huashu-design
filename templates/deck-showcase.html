@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Deck Showcase Junior Pass</title>
+  <!--
+  Junior Designer pass - not final.
+
+  Assumptions:
+  - This is a 2-slide grammar showcase before producing the full deck.
+  - Final architecture still needs confirmation: deck_index multi-file or deck_stage single-file.
+  - The visual grammar must be approved before scaling to 5+ slides.
+
+  Open questions:
+  - Audience distance: laptop, projector, or recorded talk?
+  - Export need: HTML only, PDF, or editable PPTX?
+  - Data/copy source: provided or placeholder?
+  -->
+  <style>
+    :root {
+      --bg: #11100e;
+      --paper: #f4efe6;
+      --ink: #f4efe6;
+      --muted: #a89f92;
+      --accent: #d7a85d;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #050505;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 32px;
+    }
+
+    .deck {
+      display: grid;
+      gap: 28px;
+      width: min(100%, 1220px);
+    }
+
+    .slide {
+      aspect-ratio: 16 / 9;
+      background: var(--bg);
+      border: 1px solid rgba(244, 239, 230, 0.16);
+      padding: 56px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .slide::after {
+      content: "";
+      position: absolute;
+      inset: 56px;
+      border: 1px solid rgba(244, 239, 230, 0.08);
+      pointer-events: none;
+    }
+
+    .label {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0;
+      align-self: center;
+      max-width: 860px;
+      font: 500 clamp(54px, 7vw, 104px)/0.94 ui-serif, Georgia, serif;
+      text-wrap: balance;
+    }
+
+    .grid {
+      align-self: center;
+      display: grid;
+      grid-template-columns: 0.8fr 1.2fr;
+      gap: 48px;
+      align-items: end;
+    }
+
+    .number {
+      font: 500 clamp(92px, 13vw, 190px)/0.82 ui-serif, Georgia, serif;
+      color: var(--accent);
+    }
+
+    .copy {
+      color: var(--muted);
+      font-size: clamp(20px, 2.3vw, 34px);
+      line-height: 1.18;
+      text-wrap: pretty;
+    }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <main class="deck" aria-label="Two-slide showcase">
+    <section class="slide">
+      <div class="label">Slide 01 / Cover grammar</div>
+      <h1>[Talk title or central claim]</h1>
+      <footer>
+        <span>[Speaker / brand]</span>
+        <span>Junior pass</span>
+      </footer>
+    </section>
+
+    <section class="slide">
+      <div class="label">Slide 02 / Data grammar</div>
+      <div class="grid">
+        <div class="number">[--]</div>
+        <p class="copy">[One sourced number or placeholder. This establishes how data slides will feel.]</p>
+      </div>
+      <footer>
+        <span>Source: [required]</span>
+        <span>Grammar preview</span>
+      </footer>
+    </section>
+  </main>
+</body>
+</html>
+
